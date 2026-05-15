@@ -1,33 +1,31 @@
 const express = require("express");
+const path = require("path");
+
 const app = express();
 
 app.use(express.json());
 
-// test route
+// index.html serve করবে
+app.use(express.static(__dirname));
+
 app.get("/", (req, res) => {
-  res.send("🚀 Server is running OK");
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// chat API
+// AI API
 app.post("/api/chat", (req, res) => {
-  try {
-    const messages = req.body.messages || [];
-    const lastMsg = messages.length > 0 ? messages[messages.length - 1].content : "";
 
-    return res.json({
-      reply: "🤖 Reply: " + lastMsg
-    });
+  const messages = req.body.messages || [];
+  const lastMsg = messages[messages.length - 1]?.content || "";
 
-  } catch (err) {
-    return res.json({
-      reply: "🤖 Server error fixed version working"
-    });
-  }
+  res.json({
+    reply: "🤖 তুমি বলেছো: " + lastMsg
+  });
+
 });
 
-// IMPORTANT PORT
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server running on " + PORT);
+  console.log("🚀 Server running on port " + PORT);
 });
