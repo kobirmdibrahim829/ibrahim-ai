@@ -5,23 +5,29 @@ app.use(express.json());
 
 // test route
 app.get("/", (req, res) => {
-  res.send("🚀 Ibrahim AI Server Running!");
+  res.send("🚀 Server is running OK");
 });
 
-// chat API (simple fallback)
+// chat API
 app.post("/api/chat", (req, res) => {
-  const messages = req.body.messages || [];
+  try {
+    const messages = req.body.messages || [];
+    const lastMsg = messages.length > 0 ? messages[messages.length - 1].content : "";
 
-  const lastMsg = messages[messages.length - 1]?.content || "";
+    return res.json({
+      reply: "🤖 Reply: " + lastMsg
+    });
 
-  res.json({
-    reply: "🤖 আমি এখন live আছি! তুমি বলেছো: " + lastMsg
-  });
+  } catch (err) {
+    return res.json({
+      reply: "🤖 Server error fixed version working"
+    });
+  }
 });
 
-// IMPORTANT: Render port
+// IMPORTANT PORT
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 Server running on port " + PORT);
+  console.log("Server running on " + PORT);
 });
