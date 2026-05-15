@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<!-- Ibrahim Kabir AI Website Updated (Voice + Bangla + English AI Full System) -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ibrahim Kabir | AI Portfolio</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial;
+    }
+
+    body{
+      background:
+      radial-gradient(circle at top left,#1e3c72,#0f2027 40%),
+      radial-gradient(circle at bottom right,#2a5298,#000428 50%);
+
+      color:white;
+      overflow-x:hidden;
+      min-height:100vh;
+    }
+
+    header{
+      width:100%;
+      padding:20px 50px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:fixed;
+      top:0;
+
+      background:rgba(255,255,255,0.05);
+      backdrop-filter:blur(15px);
+
+      border-bottom:1px solid rgba(255,255,255,0.1);
+
+      z-index:1000;
+    }
+
+    .logo{
+      font-size:30px;
+      font-weight:bold;
+      color:#7df9ff;
+    }
+
+    nav a{
+      color:white;
+      margin-left:20px;
+      text-decoration:none;
+    }
+
+    .hero{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding-top:120px;
+    }
+
+    .profile-pic{
+      width:200px;
+      height:200px;
+      border-radius:50%;
+      border:5px solid #7df9ff;
+      box-shadow:0 0 30px #7df9ff;
+      margin-bottom:20px;
+    }
+
+    .btn{
+      padding:10px 16px;
+      border:none;
+      border-radius:12px;
+      background:linear-gradient(135deg,#7df9ff,#00c9ff,#92fe9d);
+      color:#000;
+      cursor:pointer;
+      margin:5px;
+      font-weight:bold;
+      transition:0.3s;
+    }
+
+    .btn:hover{
+      transform:scale(1.05);
+      box-shadow:0 0 15px #7df9ff;
+    }
+
+    #loginBox{
+      width:300px;
+      margin:auto;
+      background:rgba(255,255,255,0.05);
+      padding:20px;
+      border-radius:15px;
+      text-align:center;
+      margin-top:50px;
+    }
+
+    .input-box{
+      width:100%;
+      padding:10px;
+      margin:10px 0;
+      border-radius:10px;
+      border:none;
+    }
+
+    .phone-frame{
+      width:350px;
+      height:600px;
+      margin:auto;
+
+      background:rgba(0,0,0,0.6);
+
+      border-radius:35px;
+      padding:15px;
+
+      border:2px solid #7df9ff;
+
+      box-shadow:
+      0 0 20px #7df9ff,
+      0 0 50px rgba(125,249,255,0.4);
+
+      backdrop-filter:blur(10px);
+    }
+
+    .chat-box{
+      scroll-behavior:smooth;
+      height:400px;
+      overflow-y:auto;
+      background:rgba(255,255,255,0.05);
+      padding:15px;
+      border-radius:15px;
+      border:1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-msg{
+      text-align:right;
+      margin:10px;
+      color:#fff;
+    }
+
+    .bot-msg{
+      text-align:left;
+      margin:10px;
+      color:#7df9ff;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Ibrahim Kabir AI</div>
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#chatbot">AI Chat</a>
+    <a href="#">About</a>
+  </nav>
+
+  <button class="btn" onclick="toggleTheme()">🌙 Theme</button>
+</header>
+
+<section class="hero">
+  <img src="mypic.jpg" class="profile-pic">
+  <h1>Hello I'm Ibrahim Kabir</h1>
+
+  <button class="btn" onclick="startVoice()">🎤 Speak</button>
+</section>
+
+<section id="loginBox">
+  <h2>Login</h2>
+  <input class="input-box" id="username" placeholder="Username">
+  <input class="input-box" id="password" type="password" placeholder="Password">
+  <button class="btn" onclick="login()">Login</button>
+</section>
+
+<section id="chatbot" style="display:none;">
+
+  <div class="phone-frame">
+    <div class="chat-box" id="chat"></div>
+
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn" onclick="clearChat()">🗑 Clear</button>
+      <button class="btn" onclick="downloadChat()">💾 Save</button>
+    </div>
+
+    <input class="input-box" id="msg" placeholder="Type message">
+    <button class="btn" onclick="send()">Send</button>
+    <button class="btn" onclick="startVoice()">🎤 Voice</button>
+  </div>
+
+</section>
+
+<script>
+
+// ---------- Voice ----------
+function speak(text){
+  window.speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(text);
+
+  // Smooth premium voice settings
+  speech.rate = 0.82;
+  speech.pitch = 1.05;
+  speech.volume = 1;
+
+  // Detect Bangla or English
+  const isBangla = /[ঀ-৿]/.test(text);
+
+  speech.lang = isBangla ? "bn-BD" : "en-US";
+
+  // Load available voices
+  const voices = window.speechSynthesis.getVoices();
+
+  let selectedVoice = null;
+
+  if(isBangla){
+
+    // Prefer female / natural Bangla voice
+    selectedVoice =
+      voices.find(v =>
+        v.lang.toLowerCase().includes("bn") &&
+        v.name.toLowerCase().includes("female")
+      ) ||
+      voices.find(v =>
+        v.lang.toLowerCase().includes("bn")
+      );
+
+  }else{
+
+    // Premium English female voices
+    selectedVoice =
+      voices.find(v =>
+        v.name.includes("Google UK English Female")
+      ) ||
+      voices.find(v =>
+        v.name.includes("Microsoft Zira")
+      ) ||
+      voices.find(v =>
+        v.lang.includes("en")
+      );
+  }
+
+  if(selectedVoice){
+    speech.voice = selectedVoice;
+  }
+
+  window.speechSynthesis.speak(speech);
+}
+
+// Load voices properly
+window.speechSynthesis.onvoiceschanged = () => {
+  window.speechSynthesis.getVoices();
+};
+
+function startVoice(){
+  let rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  rec.lang = "bn-BD,en-US";
+  rec.start();
+
+  rec.onresult = function(e){
+    document.getElementById("msg").value = e.results[0][0].transcript;
+    send();
+  }
+}
+
+// ---------- Login ----------
+function login(){
+  let u = document.getElementById("username").value;
+  let p = document.getElementById("password").value;
+
+  if(u=="ibrahim" && p=="1234"){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("chatbot").style.display="block";
+    alert("Login Success 🚀 Welcome Ibrahim Kabir");
+  }else{
+    alert("Wrong Login ❌");
+  }
+}
+
+// ---------- Memory ----------
+let chatHistory = [];
+
+// ---------- Level 1 LOCAL AI ----------
+function localAI(msg){
+
+  msg = msg.toLowerCase().trim();
+
+  if(msg.includes("hello") || msg.includes("hi") || msg.includes("হ্যালো")){
+    return "Hello 👋 আমি Ibrahim AI 🤖";
+  }
+
+  if(msg.includes("how are you") || msg.includes("কেমন আছো")){
+    return "আমি ভালো আছি 😄 তুমি কেমন আছো?";
+  }
+
+  if(msg.includes("your name") || msg.includes("name") || msg.includes("তোমার নাম")){
+    return "আমার নাম Ibrahim AI 🤖";
+  }
+
+  if(msg.includes("time") || msg.includes("সময়")){
+    return "⏰ এখন সময়: " + new Date().toLocaleTimeString();
+  }
+
+  if(msg.includes("date") || msg.includes("তারিখ")){
+    return "📅 আজকের তারিখ: " + new Date().toLocaleDateString();
+  }
+
+  if(msg.includes("joke")){
+    return "😂 Why do programmers prefer dark mode? Because light attracts bugs!";
+  }
+
+  if(msg.includes("help") || msg.includes("কি করতে পারো")){
+    return "🤖 আমি basic প্রশ্ন বুঝি, সময়/তারিখ বলতে পারি, আর কথা বলতে পারি!";
+  }
+
+  return "🤖 আমি এখনও শিখছি। তুমি অন্যভাবে প্রশ্ন করে দেখো 😄";
+}
+
+// ---------- REAL AI ----------
+async function getAIResponse(message){
+
+  chatHistory.push({ role:"user", content: message });
+
+  try{
+    let res = await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ messages: chatHistory })
+    });
+
+    if(!res.ok) throw new Error("server error");
+
+    let data = await res.json();
+
+    let reply = data.reply || "🤖 Server থেকে কোনো উত্তর পাওয়া যায়নি";
+
+    chatHistory.push({ role:"assistant", content: reply });
+
+    return reply;
+
+  }catch(e){
+
+    let reply = localAI(message);
+    chatHistory.push({ role:"assistant", content: reply });
+    return reply;
+  }
+}
+
+// ---------- Send ----------
+async function send(){
+
+  let m = document.getElementById("msg");
+  let chat = document.getElementById("chat");
+
+  if(m.value.trim()=="") return;
+
+  chat.innerHTML += `<div class='user-msg'>${m.value}</div>`;
+
+  let typing = document.createElement("div");
+  typing.className="bot-msg";
+  typing.innerText="Typing... 🤖";
+  chat.appendChild(typing);
+
+  chat.scrollTop = chat.scrollHeight;
+
+  let reply = await getAIResponse(m.value);
+
+  setTimeout(()=>{
+    typing.innerText = reply;
+    speak(reply);
+    chat.scrollTop = chat.scrollHeight;
+  },400);
+
+  m.value="";
+}
+
+// ---------- Save Chat ----------
+function saveMessages(){
+  localStorage.setItem("ibrahim_ai_chat", document.getElementById("chat").innerHTML);
+}
+
+function loadMessages(){
+  let saved = localStorage.getItem("ibrahim_ai_chat");
+  if(saved){
+    document.getElementById("chat").innerHTML = saved;
+  }
+}
+
+// ---------- Clear Chat ----------
+function clearChat(){
+  document.getElementById("chat").innerHTML = "";
+  localStorage.removeItem("ibrahim_ai_chat");
+}
+
+// ---------- Download Chat ----------
+function downloadChat(){
+  let text = document.getElementById("chat").innerText;
+  let blob = new Blob([text], {type:"text/plain"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ibrahim-ai-chat.txt";
+  a.click();
+}
+
+// ---------- Theme ----------
+function toggleTheme(){
+  document.body.classList.toggle("light-mode");
+}
+
+// ---------- Save every message ----------
+const oldSend = send;
+send = async function(){
+  await oldSend();
+  saveMessages();
+}
+
+// ---------- Load old chat ----------
+window.onload = ()=>{
+  loadMessages();
+}
+
+// Enter key fix
+document.addEventListener("keydown", function(e){
+  if(e.key === "Enter") send();
+});
+
+</script>
+
+</body>
+</html>
