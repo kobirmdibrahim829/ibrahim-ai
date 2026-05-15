@@ -1,31 +1,32 @@
-const express = require("express");
-const path = require("path");
-
-const app = express();
-
-app.use(express.json());
-
-// index.html serve করবে
-app.use(express.static(__dirname));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-// AI API
 app.post("/api/chat", (req, res) => {
 
   const messages = req.body.messages || [];
-  const lastMsg = messages[messages.length - 1]?.content || "";
+  const lastMsg = messages[messages.length - 1]?.content?.toLowerCase() || "";
+
+  let reply = "";
+
+  if(lastMsg.includes("hi") || lastMsg.includes("hello") || lastMsg.includes("হাই")){
+    reply = "👋 হ্যালো! আমি Ibrahim AI";
+  }
+
+  else if(lastMsg.includes("কেমন আছো")){
+    reply = "😄 আমি ভালো আছি! তুমি কেমন আছো?";
+  }
+
+  else if(lastMsg.includes("তোমার নাম")){
+    reply = "🤖 আমার নাম Ibrahim AI";
+  }
+
+  else if(lastMsg.includes("কি করতে পারো")){
+    reply = "🚀 আমি বাংলা ও ইংরেজিতে কথা বলতে পারি, chat করতে পারি, voice support আছে!";
+  }
+
+  else{
+    reply = "🤖 আমি এখনো শিখছি, আরেকটু সহজভাবে বলো 😄";
+  }
 
   res.json({
-    reply: "🤖 তুমি বলেছো: " + lastMsg
+    reply: reply
   });
 
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("🚀 Server running on port " + PORT);
 });
