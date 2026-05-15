@@ -10,32 +10,41 @@ app.post("/api/chat", async (req, res) => {
 
   try {
 
+    console.log(req.body);
+
     const userMessage = req.body.message;
 
-    if (!userMessage) {
+    if (!userMessage || userMessage.trim() === "") {
       return res.json({
-        reply: "❌ কোনো message পাওয়া যায়নি"
+        reply: "❌ Message পাওয়া যায়নি"
       });
     }
 
-    const response = await fetch(process.env.GITHUB_AI_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GITHUB_PAT}`
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "user",
-            content: userMessage
-          }
-        ],
-        model: process.env.GITHUB_AI_MODEL,
-        temperature: 0.7,
-        max_tokens: 200
-      })
-    });
+    const response = await fetch(
+      "https://models.inference.ai.azure.com/chat/completions",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.GITHUB_PAT}`
+        },
+
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+
+          messages: [
+            {
+              role: "user",
+              content: userMessage
+            }
+          ],
+
+          temperature: 0.7,
+          max_tokens: 200
+        })
+      }
+    );
 
     const data = await response.json();
 
@@ -43,7 +52,7 @@ app.post("/api/chat", async (req, res) => {
 
     const reply =
       data.choices?.[0]?.message?.content ||
-      "🤖 AI reply পাওয়া যায়নি";
+      "🤖 কোনো reply পাওয়া যায়নি";
 
     res.json({
       reply: reply
