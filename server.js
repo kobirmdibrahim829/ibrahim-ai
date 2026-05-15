@@ -1,32 +1,56 @@
-app.post("/api/chat", (req, res) => {
+require("dotenv").config();
 
-  const messages = req.body.messages || [];
-  const lastMsg = messages[messages.length - 1]?.content?.toLowerCase() || "";
+const express = require("express");
+const path = require("path");
 
-  let reply = "";
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-  if(lastMsg.includes("hi") || lastMsg.includes("hello") || lastMsg.includes("হাই")){
-    reply = "👋 হ্যালো! আমি Ibrahim AI";
+const app = express();
+
+app.use(express.json());
+app.use(express.static(__dirname));
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.post("/api/chat", async (req, res) => {
+
+  try {
+
+    const messages = req.body.messages || [];
+
+    const userMessage =
+      messages[messages.length - 1]?.content || "";
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash"
+    });
+
+    const result = await model.generateContent(userMessage);
+
+    const reply = result.response.text();
+
+    res.json({
+      reply: reply
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.json({
+      reply: "❌ AI error হয়েছে"
+    });
+
   }
 
-  else if(lastMsg.includes("কেমন আছো")){
-    reply = "😄 আমি ভালো আছি! তুমি কেমন আছো?";
-  }
+});
 
-  else if(lastMsg.includes("তোমার নাম")){
-    reply = "🤖 আমার নাম Ibrahim AI";
-  }
+const PORT = process.env.PORT || 3000;
 
-  else if(lastMsg.includes("কি করতে পারো")){
-    reply = "🚀 আমি বাংলা ও ইংরেজিতে কথা বলতে পারি, chat করতে পারি, voice support আছে!";
-  }
-
-  else{
-    reply = "🤖 আমি এখনো শিখছি, আরেকটু সহজভাবে বলো 😄";
-  }
-
-  res.json({
-    reply: reply
-  });
-
+app.listen(PORT, () => {
+  console.log("🚀 Gemini AI Server running on " + PORT);
 });
