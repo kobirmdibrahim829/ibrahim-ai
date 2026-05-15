@@ -1,5 +1,4 @@
 const express = require("express");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config();
 
 const app = express();
@@ -7,23 +6,46 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 app.post("/api/chat", async (req, res) => {
+
   try {
 
     const userMessage = req.body.message;
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash"
+    const response = await fetch(process.env.GITHUB_AI_URL, {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GITHUB_PAT}`
+      },
+
+      body: JSON.stringify({
+
+        model: process.env.GITHUB_AI_MODEL,
+
+        messages: [
+          {
+            role: "user",
+            content: userMessage
+          }
+        ]
+
+      })
+
     });
 
-    const result = await model.generateContent(userMessage);
+    const data = await response.json();
 
-    const response = result.response.text();
+    console.log(data);
+
+    const reply =
+      data.choices?.[0]?.message?.content ||
+      "কোনো reply পাওয়া যায়নি";
 
     res.json({
-      reply: response
+      reply: reply
     });
 
   } catch (err) {
@@ -35,6 +57,7 @@ app.post("/api/chat", async (req, res) => {
     });
 
   }
+
 });
 
 const PORT = process.env.PORT || 3000;
