@@ -21,5 +21,6 @@
   "homepage": "https://github.com/kobirmdibrahim829/ibrahim-ai#readme",
   "dependencies": {
     "express": "^5.2.1"
-  }
+  },
+  "devDependencies": {}
 }
