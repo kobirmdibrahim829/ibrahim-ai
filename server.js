@@ -12,28 +12,29 @@ app.post("/api/chat", async (req, res) => {
 
     const userMessage = req.body.message;
 
+    if (!userMessage) {
+      return res.json({
+        reply: "❌ কোনো message পাওয়া যায়নি"
+      });
+    }
+
     const response = await fetch(process.env.GITHUB_AI_URL, {
-
       method: "POST",
-
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.GITHUB_PAT}`
       },
-
       body: JSON.stringify({
-
-        model: process.env.GITHUB_AI_MODEL,
-
         messages: [
           {
             role: "user",
             content: userMessage
           }
-        ]
-
+        ],
+        model: process.env.GITHUB_AI_MODEL,
+        temperature: 0.7,
+        max_tokens: 200
       })
-
     });
 
     const data = await response.json();
@@ -42,7 +43,7 @@ app.post("/api/chat", async (req, res) => {
 
     const reply =
       data.choices?.[0]?.message?.content ||
-      "কোনো reply পাওয়া যায়নি";
+      "🤖 AI reply পাওয়া যায়নি";
 
     res.json({
       reply: reply
