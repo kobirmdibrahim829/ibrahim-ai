@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<!-- Ibrahim Kabir AI Website Updated (Voice + Bangla + English AI Full System) -->
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Ibrahim Kabir | AI Portfolio</title>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
+
     *{
       margin:0;
       padding:0;
@@ -72,6 +75,7 @@
       border:5px solid #7df9ff;
       box-shadow:0 0 30px #7df9ff;
       margin-bottom:20px;
+      object-fit:cover;
     }
 
     .btn{
@@ -103,10 +107,11 @@
 
     .input-box{
       width:100%;
-      padding:10px;
+      padding:12px;
       margin:10px 0;
       border-radius:10px;
       border:none;
+      outline:none;
     }
 
     .phone-frame{
@@ -142,18 +147,28 @@
       text-align:right;
       margin:10px;
       color:#fff;
+      word-wrap:break-word;
     }
 
     .bot-msg{
       text-align:left;
       margin:10px;
       color:#7df9ff;
+      word-wrap:break-word;
     }
+
+    .light-mode{
+      background:white;
+      color:black;
+    }
+
   </style>
 </head>
+
 <body>
 
 <header>
+
   <div class="logo">Ibrahim Kabir AI</div>
 
   <nav>
@@ -163,25 +178,44 @@
   </nav>
 
   <button class="btn" onclick="toggleTheme()">🌙 Theme</button>
+
 </header>
 
 <section class="hero">
+
   <img src="mypic.jpg" class="profile-pic">
+
   <h1>Hello I'm Ibrahim Kabir</h1>
 
   <button class="btn" onclick="startVoice()">🎤 Speak</button>
+
 </section>
 
 <section id="loginBox">
+
   <h2>Login</h2>
-  <input class="input-box" id="username" placeholder="Username">
-  <input class="input-box" id="password" type="password" placeholder="Password">
+
+  <input
+    class="input-box"
+    id="username"
+    placeholder="Username"
+  >
+
+  <input
+    class="input-box"
+    id="password"
+    type="password"
+    placeholder="Password"
+  >
+
   <button class="btn" onclick="login()">Login</button>
+
 </section>
 
-<section id="chatbot" style="display:none;">
+<section id="chatbot" style="display:none; margin-bottom:50px;">
 
   <div class="phone-frame">
+
     <div class="chat-box" id="chat"></div>
 
     <div style="display:flex;gap:8px;margin-top:10px;">
@@ -189,9 +223,16 @@
       <button class="btn" onclick="downloadChat()">💾 Save</button>
     </div>
 
-    <input class="input-box" id="msg" placeholder="Type message">
+    <input
+      class="input-box"
+      id="msg"
+      placeholder="Type message"
+    >
+
     <button class="btn" onclick="send()">Send</button>
+
     <button class="btn" onclick="startVoice()">🎤 Voice</button>
+
   </div>
 
 </section>
@@ -200,50 +241,35 @@
 
 // ---------- Voice ----------
 function speak(text){
+
   window.speechSynthesis.cancel();
 
   const speech = new SpeechSynthesisUtterance(text);
 
-  // Smooth premium voice settings
-  speech.rate = 0.82;
-  speech.pitch = 1.05;
+  speech.rate = 0.9;
+  speech.pitch = 1;
   speech.volume = 1;
 
-  // Detect Bangla or English
   const isBangla = /[ঀ-৿]/.test(text);
 
   speech.lang = isBangla ? "bn-BD" : "en-US";
 
-  // Load available voices
   const voices = window.speechSynthesis.getVoices();
 
   let selectedVoice = null;
 
   if(isBangla){
 
-    // Prefer female / natural Bangla voice
     selectedVoice =
-      voices.find(v =>
-        v.lang.toLowerCase().includes("bn") &&
-        v.name.toLowerCase().includes("female")
-      ) ||
-      voices.find(v =>
-        v.lang.toLowerCase().includes("bn")
-      );
+      voices.find(v => v.lang.includes("bn")) ||
+      voices[0];
 
   }else{
 
-    // Premium English female voices
     selectedVoice =
-      voices.find(v =>
-        v.name.includes("Google UK English Female")
-      ) ||
-      voices.find(v =>
-        v.name.includes("Microsoft Zira")
-      ) ||
-      voices.find(v =>
-        v.lang.includes("en")
-      );
+      voices.find(v => v.lang.includes("en")) ||
+      voices[0];
+
   }
 
   if(selectedVoice){
@@ -253,32 +279,53 @@ function speak(text){
   window.speechSynthesis.speak(speech);
 }
 
-// Load voices properly
 window.speechSynthesis.onvoiceschanged = () => {
   window.speechSynthesis.getVoices();
 };
 
+// ---------- Voice Input ----------
 function startVoice(){
-  let rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  rec.lang = "bn-BD,en-US";
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if(!SpeechRecognition){
+    alert("Voice recognition not supported");
+    return;
+  }
+
+  let rec = new SpeechRecognition();
+
+  rec.lang = "bn-BD";
+
   rec.start();
 
   rec.onresult = function(e){
-    document.getElementById("msg").value = e.results[0][0].transcript;
+
+    document.getElementById("msg").value =
+      e.results[0][0].transcript;
+
     send();
-  }
+  };
 }
 
 // ---------- Login ----------
 function login(){
+
   let u = document.getElementById("username").value;
   let p = document.getElementById("password").value;
 
-  if(u=="ibrahim" && p=="1234"){
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("chatbot").style.display="block";
-    alert("Login Success 🚀 Welcome Ibrahim Kabir");
+  if(u === "ibrahim" && p === "1234"){
+
+    document.getElementById("loginBox").style.display = "none";
+
+    document.getElementById("chatbot").style.display = "block";
+
+    alert("Login Success 🚀");
+
   }else{
+
     alert("Wrong Login ❌");
   }
 }
@@ -286,69 +333,38 @@ function login(){
 // ---------- Memory ----------
 let chatHistory = [];
 
-// ---------- Level 1 LOCAL AI ----------
-function localAI(msg){
-
-  msg = msg.toLowerCase().trim();
-
-  if(msg.includes("hello") || msg.includes("hi") || msg.includes("হ্যালো")){
-    return "Hello 👋 আমি Ibrahim AI 🤖";
-  }
-
-  if(msg.includes("how are you") || msg.includes("কেমন আছো")){
-    return "আমি ভালো আছি 😄 তুমি কেমন আছো?";
-  }
-
-  if(msg.includes("your name") || msg.includes("name") || msg.includes("তোমার নাম")){
-    return "আমার নাম Ibrahim AI 🤖";
-  }
-
-  if(msg.includes("time") || msg.includes("সময়")){
-    return "⏰ এখন সময়: " + new Date().toLocaleTimeString();
-  }
-
-  if(msg.includes("date") || msg.includes("তারিখ")){
-    return "📅 আজকের তারিখ: " + new Date().toLocaleDateString();
-  }
-
-  if(msg.includes("joke")){
-    return "😂 Why do programmers prefer dark mode? Because light attracts bugs!";
-  }
-
-  if(msg.includes("help") || msg.includes("কি করতে পারো")){
-    return "🤖 আমি basic প্রশ্ন বুঝি, সময়/তারিখ বলতে পারি, আর কথা বলতে পারি!";
-  }
-
-  return "🤖 আমি এখনও শিখছি। তুমি অন্যভাবে প্রশ্ন করে দেখো 😄";
-}
-
-// ---------- REAL AI ----------
+// ---------- Real Gemini AI ----------
 async function getAIResponse(message){
 
-  chatHistory.push({ role:"user", content: message });
-
   try{
-    let res = await fetch("/api/chat",{
+
+    const res = await fetch("/chat",{
+
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ messages: chatHistory })
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body: JSON.stringify({
+        message: message
+      })
+
     });
 
-    if(!res.ok) throw new Error("server error");
+    if(!res.ok){
+      throw new Error("Server Error");
+    }
 
-    let data = await res.json();
+    const data = await res.json();
 
-    let reply = data.reply || "🤖 Server থেকে কোনো উত্তর পাওয়া যায়নি";
+    return data.reply;
 
-    chatHistory.push({ role:"assistant", content: reply });
+  }catch(error){
 
-    return reply;
+    console.log(error);
 
-  }catch(e){
-
-    let reply = localAI(message);
-    chatHistory.push({ role:"assistant", content: reply });
-    return reply;
+    return "❌ AI server connection error";
   }
 }
 
@@ -356,78 +372,114 @@ async function getAIResponse(message){
 async function send(){
 
   let m = document.getElementById("msg");
+
   let chat = document.getElementById("chat");
 
-  if(m.value.trim()=="") return;
+  if(m.value.trim() === "") return;
 
-  chat.innerHTML += `<div class='user-msg'>${m.value}</div>`;
+  const userMessage = m.value;
+
+  chat.innerHTML += `
+    <div class='user-msg'>
+      ${userMessage}
+    </div>
+  `;
 
   let typing = document.createElement("div");
-  typing.className="bot-msg";
-  typing.innerText="Typing... 🤖";
+
+  typing.className = "bot-msg";
+
+  typing.innerText = "Typing... 🤖";
+
   chat.appendChild(typing);
 
   chat.scrollTop = chat.scrollHeight;
 
-  let reply = await getAIResponse(m.value);
+  m.value = "";
+
+  let reply = await getAIResponse(userMessage);
 
   setTimeout(()=>{
-    typing.innerText = reply;
-    speak(reply);
-    chat.scrollTop = chat.scrollHeight;
-  },400);
 
-  m.value="";
+    typing.innerText = reply;
+
+    speak(reply);
+
+    chat.scrollTop = chat.scrollHeight;
+
+    saveMessages();
+
+  },400);
 }
 
 // ---------- Save Chat ----------
 function saveMessages(){
-  localStorage.setItem("ibrahim_ai_chat", document.getElementById("chat").innerHTML);
+
+  localStorage.setItem(
+    "ibrahim_ai_chat",
+    document.getElementById("chat").innerHTML
+  );
 }
 
+// ---------- Load Chat ----------
 function loadMessages(){
-  let saved = localStorage.getItem("ibrahim_ai_chat");
+
+  let saved =
+    localStorage.getItem("ibrahim_ai_chat");
+
   if(saved){
-    document.getElementById("chat").innerHTML = saved;
+
+    document.getElementById("chat").innerHTML =
+      saved;
   }
 }
 
 // ---------- Clear Chat ----------
 function clearChat(){
+
   document.getElementById("chat").innerHTML = "";
+
   localStorage.removeItem("ibrahim_ai_chat");
 }
 
 // ---------- Download Chat ----------
 function downloadChat(){
-  let text = document.getElementById("chat").innerText;
-  let blob = new Blob([text], {type:"text/plain"});
+
+  let text =
+    document.getElementById("chat").innerText;
+
+  let blob = new Blob([text],{
+    type:"text/plain"
+  });
+
   let a = document.createElement("a");
+
   a.href = URL.createObjectURL(blob);
+
   a.download = "ibrahim-ai-chat.txt";
+
   a.click();
 }
 
 // ---------- Theme ----------
 function toggleTheme(){
+
   document.body.classList.toggle("light-mode");
 }
 
-// ---------- Save every message ----------
-const oldSend = send;
-send = async function(){
-  await oldSend();
-  saveMessages();
-}
+// ---------- Load ----------
+window.onload = () => {
 
-// ---------- Load old chat ----------
-window.onload = ()=>{
   loadMessages();
-}
+};
 
-// Enter key fix
+// ---------- Enter Key ----------
 document.addEventListener("keydown", function(e){
-  if(e.key === "Enter") send();
+
+  if(e.key === "Enter"){
+
+    send();
+  }
 });
 
 </script>

@@ -14,7 +14,9 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY
+);
 
 app.post("/chat", async (req, res) => {
 
@@ -26,9 +28,11 @@ app.post("/chat", async (req, res) => {
       model: "gemini-1.5-flash"
     });
 
-    const result = await model.generateContent(userMessage);
+    const result =
+      await model.generateContent(userMessage);
 
-    const response = result.response.text();
+    const response =
+      result.response.text();
 
     res.json({
       reply: response
@@ -39,15 +43,16 @@ app.post("/chat", async (req, res) => {
     console.log(error);
 
     res.status(500).json({
-      reply: "AI Error"
+      reply: "❌ Gemini AI Error"
     });
-
   }
-
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+
+  res.sendFile(
+    path.join(__dirname, "public", "index.html")
+  );
 });
 
 const PORT = process.env.PORT || 3000;
