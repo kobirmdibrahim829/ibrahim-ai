@@ -1,77 +1,57 @@
 const express = require("express");
-require("dotenv").config();
+const cors = require("cors");
+const dotenv = require("dotenv");
+const path = require("path");
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+dotenv.config();
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
 
-app.post("/api/chat", async (req, res) => {
+app.use(express.static(path.join(__dirname, "public")));
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+app.post("/chat", async (req, res) => {
 
   try {
 
-    console.log(req.body);
-
     const userMessage = req.body.message;
 
-    if (!userMessage || userMessage.trim() === "") {
-      return res.json({
-        reply: "❌ Message পাওয়া যায়নি"
-      });
-    }
-
-    const response = await fetch(
-      "https://models.inference.ai.azure.com/chat/completions",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.GITHUB_PAT}`
-        },
-
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-
-          messages: [
-            {
-              role: "user",
-              content: userMessage
-            }
-          ],
-
-          temperature: 0.7,
-          max_tokens: 200
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    console.log(data);
-
-    const reply =
-      data.choices?.[0]?.message?.content ||
-      "🤖 কোনো reply পাওয়া যায়নি";
-
-    res.json({
-      reply: reply
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash"
     });
 
-  } catch (err) {
+    const result = await model.generateContent(userMessage);
 
-    console.log(err);
+    const response = result.response.text();
 
     res.json({
-      reply: "❌ AI error হয়েছে"
+      reply: response
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      reply: "AI Error"
     });
 
   }
 
 });
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server is running OK");
+  console.log("Server running on port " + PORT);
 });
