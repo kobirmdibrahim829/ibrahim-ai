@@ -14,9 +14,11 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
+console.log("KEY CHECK:", process.env.GEMINI_API_KEY);
 const genAI = new GoogleGenerativeAI(
   process.env.GEMINI_API_KEY
 );
+
 
 app.post("/chat", async (req, res) => {
 
